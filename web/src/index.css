@@ -1,0 +1,18 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #213547;
+  background: #f9fafb;
+}
+
+body {
+  margin: 0;
+}
+
+table {
+  font-size: 14px;
+}
+
+tr:hover {
+  background: #f3f4f6;
+}

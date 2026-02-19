@@ -1,0 +1,11 @@
+{
+  "seed_files": [
+    "memory.md",
+    "reasoning_tree.json",
+    "handoff.md",
+    "iteration_summary.md",
+    "cases.md",
+    "tasks.md",
+    "worklog.md"
+  ]
+}

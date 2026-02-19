@@ -1,0 +1,44 @@
+[project]
+name = "agentic-kusto-detective"
+version = "0.1.0"
+description = "Agentic benchmark for solving Kusto Detective Agency challenges"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "github-copilot-sdk>=0.1.0",
+    "azure-kusto-data>=4.6.0",
+    "azure-identity>=1.17.0",
+    "playwright>=1.49.0",
+    "pydantic>=2.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "sse-starlette>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "ty>=0.0.1",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[project.scripts]
+detective = "detective.main:main"
+detective-season = "detective.season:main"
+detective-server = "detective.server:main"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+markers = [
+    "llm: tests that call an LLM via the Copilot SDK (slow, requires auth)",
+]
