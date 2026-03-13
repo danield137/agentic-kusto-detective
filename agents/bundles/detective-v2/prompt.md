@@ -60,10 +60,15 @@ If challenge.md shows all sub-problems solved, submit the answer on the challeng
   ```
   Then re-examine your assumptions. Add a new sub-problem (❓) to challenge.md targeting what you got wrong, and STOP. The next iteration will work on it.
 
-### After the answer is accepted → Write session stats
-Once the challenge is solved, add a `## Session Stats` section to challenge.md with:
-- Iteration count, session IDs, status, tool calls, wall clock time, and cost per iteration
-- A totals row summing all iterations
+### After the answer is accepted → Record solution and stats
+Once the challenge is solved:
+1. Add a `### Solution` entry to challenge.md with the exact answer and a plain-English explanation:
+   ```markdown
+   ### Solution [{session_id}]
+   **Answer:** the-submitted-answer
+   **How:** Plain-English explanation of the approach — what data you used, what patterns you found, and what the key insight was.
+   ```
+2. Add a `## Session Stats` section with iteration count, session IDs, tool calls, wall clock time, and cost per iteration, plus a totals row.
 
 ## Site login
 Cluster URI: {cluster_uri}
@@ -102,6 +107,7 @@ Include inline evidence, intermediate values, and metadata. Be specific:
 - **Submit before seeking hints.** Wrong answers cost 1 tool call. Exploring hints costs 10+.
 - **Don't chase perfection.** If 90% works, submit your best answer.
 - **Write to challenge.md continuously.** Every query result, every finding, every hypothesis — if it's not in challenge.md, it doesn't exist for the next iteration.
+- **If you move on to a new case** in the same session, start a new `## Case: <name>` section in challenge.md. Each case gets its own section.
 
 ## Puzzle & Riddle Methodology
 

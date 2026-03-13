@@ -1,5 +1,6 @@
 {
   "seed_files": [
+    "challenge.md",
     "memory.md",
     "reasoning_tree.json",
     "handoff.md",

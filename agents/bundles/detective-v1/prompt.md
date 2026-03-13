@@ -35,6 +35,7 @@ Cluster URI: {cluster_uri}
 
 ## Workspace Files
 Your session directory is `{session_dir}`. These files are your source of truth:
+- **`challenge.md`** — Your progress journal for each case. See "Progress Journal" below.
 - **`memory.md`** — All knowledge, reasoning, confirmed facts. Read with `recall_memory`, write with `save_memory`.
 - **`cases.md`** — Which cases are solved/unsolved, current case progress. Update as you go.
 - **`tasks.md`** — Flat checklist of single-sentence work items. Check off completed items. Add new items as you discover sub-problems.
@@ -42,6 +43,43 @@ Your session directory is `{session_dir}`. These files are your source of truth:
 
 Save any scripts or temporary files to `{session_dir}`.
 Do NOT create files in the repo root or working directory.
+
+## Progress Journal — challenge.md (MANDATORY)
+
+You MUST maintain `challenge.md` as a structured progress journal. This file carries across Ralph iterations and is the permanent record of your investigation.
+
+### When starting a new case:
+Write a `## Case: <full case name>` header, followed by your problem restatement:
+```markdown
+## Case: Case 5 — The secret satisfsatisfies
+
+### Problem
+<restate the challenge in your own words>
+```
+
+### After each major discovery or failed approach:
+Append a numbered update with your session ID:
+```markdown
+### Update 1 — Explored schema [{session_id}]
+Found tables: EmailEvents, NetworkLogs. Key columns: ...
+
+### Update 2 — Decoded the cipher [{session_id}]
+Email subjects use ROT13. Decoded "xhanqn.bet" → "kunada.org"
+
+### Update 3 — Wrong answer [{session_id}]
+Submitted "kunada.org" but it was rejected. Re-examining...
+```
+
+### When the answer is accepted:
+Write a `### Solution` entry with the exact answer AND a plain-English explanation:
+```markdown
+### Solution [{session_id}]
+**Answer:** kunada.org
+**How:** Decoded ROT13 on email subjects in the EmailEvents table, cross-referenced decoded domains with DnsRecords to find the phishing domain.
+```
+
+### If you move on to a new case in the same session:
+Start a new `## Case:` section. Each case gets its own section in the same file.
 
 ## Rules
 - **Solve it yourself.** Do NOT search the web for walkthroughs, solutions, or hints. The goal is to reason through the data — looking up answers defeats the purpose.
