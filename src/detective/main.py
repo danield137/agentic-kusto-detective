@@ -12,11 +12,11 @@ from detective.runner import resume_session, run_session  # noqa: E402
 
 async def _run(
     challenge_url: str, follow: bool, bundle: str = "detective-v1",
-    max_steps: int = 0, seed_from: str = "",
+    max_steps: int = 0, seed_from: str = "", task: str = "",
 ) -> None:
     action_log = await run_session(
         challenge_url, follow=follow, bundle=bundle,
-        max_steps=max_steps, seed_from=seed_from,
+        max_steps=max_steps, seed_from=seed_from, task=task,
     )
     print(f"Action log: {action_log.path}")
     action_log.print_summary()
@@ -64,6 +64,8 @@ def main():
     max_steps = int(max_steps_str) if max_steps_str else 0
     seed_from, args = _extract_option(args, "--seed-from")
     seed_from = seed_from or ""
+    task, args = _extract_option(args, "--task")
+    task = task or ""
 
     if resume_id:
         asyncio.run(_resume(resume_id, follow=follow, bundle=bundle, max_steps=max_steps))
@@ -80,6 +82,7 @@ def main():
         print("  --resume <session_id>   Resume an interrupted session")
         print("  --seed-from <session_id> Start fresh but copy memory/tree")
         print("  --bundle <name>         Agent bundle (default: detective-v1)")
+        print("  --task <instruction>    Scope session to a specific task")
         print("  --max-steps <n>         Stop after n tool calls (0 = unlimited)")
         print()
         print("Environment variables:")
@@ -89,7 +92,7 @@ def main():
     challenge_url = args[0]
     asyncio.run(_run(
         challenge_url, follow=follow, bundle=bundle,
-        max_steps=max_steps, seed_from=seed_from,
+        max_steps=max_steps, seed_from=seed_from, task=task,
     ))
 
 

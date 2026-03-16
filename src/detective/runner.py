@@ -190,6 +190,7 @@ async def run_session(
     bundle: str = DEFAULT_BUNDLE,
     max_steps: int = 0,
     seed_from: str = "",
+    task: str = "",
 ) -> ActionLog:
     """Run a detective agent session against a single challenge.
 
@@ -201,6 +202,8 @@ async def run_session(
         max_steps: Stop after this many tool calls (0 = unlimited).
         seed_from: Optional session_id to copy memory, reasoning tree,
             and handoff from before starting.
+        task: Optional task instruction appended to the initial prompt.
+            Use to scope the session to a specific challenge or action.
 
     Returns:
         The ActionLog instance with session results.
@@ -303,12 +306,13 @@ async def run_session(
         session.on(_counting_handler)
 
         action_log.log_prompt(f"Solve the Kusto Detective challenge at: {challenge_url}")
-        await session.send({
-            "prompt": (
-                f"Go to {challenge_url} and solve the first UNSOLVED case. "
-                "Cases with a checkmark are already solved — skip them."
-            ),
-        })
+        initial_prompt = (
+            f"Go to {challenge_url} and solve the first UNSOLVED case. "
+            "Cases with a checkmark are already solved — skip them."
+        )
+        if task:
+            initial_prompt = task + f"\n\nSite URL: {challenge_url}"
+        await session.send({"prompt": initial_prompt})
 
         # Main loop: poll for idle with activity-aware stuck detection
         _consecutive_nudges = 0

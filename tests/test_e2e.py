@@ -1,16 +1,16 @@
 """E2E test — run the detective agent against synthetic challenges.
 
-Starts the test server, runs the agent via run_session(), and verifies
-that challenges were solved by checking test_state.json.
+Starts the test server, runs the agent via run_session() with one
+session per challenge (isolated metrics), and verifies results.
 
 Requirements:
     - Azure credentials (az login)
     - DETECTIVE_CLUSTER_URI env var
-    - TestChallenges database with test data (run tests/setup_kusto.py first)
+    - MyDatabase with test data (run tests/setup_kusto.py first)
     - GITHUB_TOKEN env var for Copilot SDK
 
 Usage:
-    python -m pytest tests/test_e2e.py -v -m llm
+    python -m pytest tests/test_e2e.py -v -m llm --run-llm
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ from detective.runner import run_session
 
 TESTS_DIR = Path(__file__).parent
 STATE_PATH = TESTS_DIR / "test_state.json"
+CHALLENGES_PATH = TESTS_DIR / "challenges.json"
 
 
 def _find_free_port() -> int:
@@ -48,6 +49,14 @@ def _reset_state() -> None:
 
 def _read_state() -> dict:
     return json.loads(STATE_PATH.read_text(encoding="utf-8"))
+
+
+def _load_challenges() -> list[dict]:
+    import os
+    cluster_uri = os.environ.get("DETECTIVE_CLUSTER_URI", "")
+    raw = CHALLENGES_PATH.read_text(encoding="utf-8")
+    raw = raw.replace("{cluster_uri}", cluster_uri)
+    return json.loads(raw)
 
 
 class _ServerThread:
@@ -96,57 +105,44 @@ async def test_server():
 
 @pytest.mark.llm
 @pytest.mark.asyncio
-async def test_agent_solves_first_challenge(test_server: str):
-    """Run agent against the test server and verify it solves at least one challenge."""
-    action_log = await run_session(
-        challenge_url=f"{test_server}/inbox",
-        follow=True,
-        bundle="detective-v2",
-        max_steps=80,
-    )
+async def test_agent_solves_challenges_isolated(test_server: str):
+    """Run one session per challenge, verifying metrics isolation."""
+    challenges = _load_challenges()
+    session_ids: list[str] = []
 
-    action_log.print_summary()
+    for challenge in challenges:
+        task = (
+            f"Go to {test_server}/inbox and solve ONLY "
+            f"'{challenge['name']}'. "
+            f"Click on it in the sidebar, read the challenge, solve it, "
+            f"submit the answer, then save_memory and STOP. "
+            f"Do NOT work on any other challenge."
+        )
 
+        action_log = await run_session(
+            challenge_url=f"{test_server}/inbox",
+            follow=True,
+            bundle="detective-v2",
+            max_steps=50,
+            task=task,
+        )
+
+        action_log.print_summary()
+        session_ids.append(str(action_log.path.parent.name))
+
+        # Verify this specific challenge was solved
+        state = _read_state()
+        assert challenge["slug"] in state.get("solved", {}), (
+            f"Agent didn't solve {challenge['name']}. "
+            f"Submissions: {state.get('submissions', [])}"
+        )
+        print(f"  ✅ {challenge['name']}: solved with "
+              f"{action_log._tool_count} tools, "
+              f"{action_log._total_input_tokens + action_log._total_output_tokens:,} tokens")
+
+    # All solved
     state = _read_state()
-    solved = state.get("solved", {})
-
-    # Agent should have solved at least the first challenge
-    assert len(solved) >= 1, (
-        f"Agent didn't solve any challenges. "
-        f"Submissions: {state.get('submissions', [])}"
+    assert len(state.get("solved", {})) == len(challenges), (
+        f"Expected {len(challenges)} solved, got {len(state.get('solved', {}))}"
     )
-
-    # Check that the answer was correct
-    for slug, info in solved.items():
-        print(f"  ✅ {slug}: answer={info['answer']}")
-
-
-@pytest.mark.llm
-@pytest.mark.asyncio
-async def test_agent_solves_all_challenges(test_server: str):
-    """Run agent with enough steps to attempt all 3 challenges."""
-    action_log = await run_session(
-        challenge_url=f"{test_server}/inbox",
-        follow=True,
-        bundle="detective-v2",
-        max_steps=200,
-    )
-
-    action_log.print_summary()
-
-    state = _read_state()
-    solved = state.get("solved", {})
-
-    print(f"\n  Solved {len(solved)}/3 challenges:")
-    for slug, info in solved.items():
-        print(f"    ✅ {slug}: answer={info['answer']}")
-
-    unsolved = {"number-crunch", "timezone-twist", "final-count"} - set(solved.keys())
-    if unsolved:
-        print(f"    ❌ Unsolved: {unsolved}")
-
-    assert len(solved) == 3, (
-        f"Agent solved {len(solved)}/3 challenges. "
-        f"Unsolved: {unsolved}. "
-        f"Submissions: {json.dumps(state.get('submissions', []), indent=2)}"
-    )
+    print(f"\n  Session IDs for report: {', '.join(session_ids)}")
