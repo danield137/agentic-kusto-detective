@@ -23,7 +23,11 @@ STATE_PATH = Path(__file__).parent / "test_state.json"
 
 
 def _load_challenges() -> list[dict]:
-    return json.loads(CHALLENGES_PATH.read_text(encoding="utf-8"))
+    import os
+    cluster_uri = os.environ.get("DETECTIVE_CLUSTER_URI", "https://help.kusto.windows.net")
+    raw = CHALLENGES_PATH.read_text(encoding="utf-8")
+    raw = raw.replace("{cluster_uri}", cluster_uri)
+    return json.loads(raw)
 
 
 def _load_state() -> dict:

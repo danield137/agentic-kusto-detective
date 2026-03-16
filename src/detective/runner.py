@@ -53,6 +53,7 @@ def _build_system_prompt(bundle: AgentBundle, ctx: SessionContext) -> str:
         cluster_uri=cluster_uri,
         memory_context=memory_context,
         session_dir=str(ctx.session_dir),
+        session_id=ctx.session_id,
     )
 
     # Append static knowledge files (everything in knowledge/ except memory-template.md)

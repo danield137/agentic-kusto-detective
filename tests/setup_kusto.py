@@ -12,8 +12,12 @@ from __future__ import annotations
 import os
 import sys
 
-from azure.identity import DefaultAzureCredential
-from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from azure.identity import DefaultAzureCredential  # noqa: E402
+from azure.kusto.data import KustoClient, KustoConnectionStringBuilder  # noqa: E402
 
 
 def get_client() -> KustoClient:
@@ -28,7 +32,7 @@ def get_client() -> KustoClient:
     return KustoClient(kcsb)
 
 
-DATABASE = "TestChallenges"
+DATABASE = "MyDatabase"
 
 
 def _run_command(client: KustoClient, command: str) -> None:
@@ -75,10 +79,9 @@ def setup_numbers_table(client: KustoClient) -> None:
     batch_size = 20
     for start in range(0, len(fibs), batch_size):
         batch = fibs[start:start + batch_size]
-        _run_command(client, f"""
-            .ingest inline into table Numbers <|
-{chr(10).join(f'{n},{v}' for n, v in batch)}
-        """)
+        data_lines = "\n".join(f"{n},{v}" for n, v in batch)
+        cmd = f".ingest inline into table Numbers <|\n{data_lines}"
+        _run_command(client, cmd)
 
     count = _run_query(client, "Numbers | count")
     print(f"  Numbers table: {count} rows")
@@ -128,11 +131,9 @@ def setup_cities_table(client: KustoClient) -> None:
         ("Nairobi", "Africa", 3),
     ]
 
-    rows = "\n".join(f"{name},{continent},{tz}" for name, continent, tz in cities)
-    _run_command(client, f"""
-        .ingest inline into table Cities <|
-{rows}
-    """)
+    data_lines = "\n".join(f"{name},{continent},{tz}" for name, continent, tz in cities)
+    cmd = f".ingest inline into table Cities <|\n{data_lines}"
+    _run_command(client, cmd)
 
     count = _run_query(client, "Cities | count")
     print(f"  Cities table: {count} rows")
@@ -161,7 +162,7 @@ def main() -> None:
         print("\n✅ Test data setup complete.")
     except Exception as e:
         print(f"\n❌ Setup failed: {e}", file=sys.stderr)
-        print("Make sure you have a 'TestChallenges' database in your cluster.",
+        print("Make sure you have a 'MyDatabase' database in your cluster.",
               file=sys.stderr)
         sys.exit(1)
 
