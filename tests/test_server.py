@@ -146,6 +146,20 @@ button { padding: 8px 20px; font-size: 16px; cursor: pointer;
         _save_state(state)
         return RedirectResponse("/inbox", status_code=303)
 
+    @app.post("/api/reset")
+    async def reset_all():
+        """Reset all state — all challenges become unsolved."""
+        _save_state({"solved": {}, "submissions": [], "logged_in": False})
+        return {"status": "reset", "message": "All challenges reset"}
+
+    @app.post("/api/reset/{slug}")
+    async def reset_challenge(slug: str):
+        """Reset a single challenge — mark it as unsolved."""
+        state = _load_state()
+        state.get("solved", {}).pop(slug, None)
+        _save_state(state)
+        return {"status": "reset", "slug": slug}
+
     @app.get("/inbox", response_class=HTMLResponse)
     async def inbox():
         content = "<h1>Inbox</h1><p>Select a case from the sidebar to begin.</p>"
@@ -174,14 +188,15 @@ button { padding: 8px 20px; font-size: 16px; cursor: pointer;
             <strong>✓ Solved!</strong> Your answer: {answer}
             </div>
             """
-        else:
-            content += f"""
-            <h3>Submit your answer</h3>
-            <form method="post" action="/inbox/{slug}/submit">
-            <p><input type="text" name="answer" placeholder="Your answer" /></p>
-            <p><button type="submit">Submit</button></p>
-            </form>
-            """
+
+        # Always show submission form (enables re-solving for benchmarks)
+        content += f"""
+        <h3>Submit your answer</h3>
+        <form method="post" action="/inbox/{slug}/submit">
+        <p><input type="text" name="answer" placeholder="Your answer" /></p>
+        <p><button type="submit">Submit</button></p>
+        </form>
+        """
 
         return HTMLResponse(_page(c["name"], content, sidebar_slug=slug))
 
