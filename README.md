@@ -173,9 +173,18 @@ src/detective/
 
 ralph.py                 # Multi-iteration loop with session distillation
 start.py                 # Start web dashboard (backend + frontend)
+generate_report.py       # Markdown report from session logs
 
 agents/bundles/          # Declarative agent configurations
 web/                     # React + TypeScript dashboard (Vite)
+
+tests/
+├── test_server.py       # Local server mimicking detective.kusto.io
+├── test_e2e.py          # E2E pytest tests (@pytest.mark.llm)
+├── run_isolated.py      # Standalone: one session per challenge
+├── setup_kusto.py       # Create test tables in Kusto cluster
+├── challenges.json      # Synthetic challenge definitions
+└── conftest.py          # pytest config (--run-llm flag)
 ```
 
 ## Environment Variables
@@ -185,6 +194,91 @@ web/                     # React + TypeScript dashboard (Vite)
 | `GITHUB_TOKEN` | Yes | GitHub PAT for Copilot SDK |
 | `DETECTIVE_CLUSTER_URI` | Yes | Your free Azure Data Explorer cluster URI |
 | `DETECTIVE_HEADLESS` | No | Set to `true` for headless Playwright (default: `false`) |
+
+## Testing
+
+The project includes an E2E test harness that runs the agent against synthetic challenges on a local server mimicking detective.kusto.io.
+
+### Architecture
+
+```
+┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Test Runner │────>│  Local Server    │     │  Kusto Cluster   │
+│  (pytest)    │     │  (FastAPI)       │     │  (MyDatabase)    │
+│              │     │                  │     │                  │
+│  One session │     │  /inbox          │     │  Numbers table   │
+│  per case    │     │  /inbox/<slug>   │     │  Cities table    │
+│              │     │  /submit         │     │                  │
+└──────┬───────┘     └──────────────────┘     └────────▲─────────┘
+       │                                               │
+       │         ┌──────────────────┐                  │
+       └────────>│  Agent           │──────────────────┘
+                 │  (Copilot SDK)   │  KQL queries
+                 │                  │
+                 │  Playwright ─────┘  Browser automation
+                 └──────────────────┘
+```
+
+The agent navigates the local server with Playwright (same as it would detective.kusto.io), reads challenge pages, queries the Kusto cluster for answers, and submits via the browser.
+
+### Synthetic challenges
+
+Three challenges are defined in `tests/challenges.json`:
+
+| # | Challenge | Type | Answer |
+|---|-----------|------|--------|
+| 1 | Number Crunch | Query `Numbers` table for F(100), extract 2nd digit | `5` |
+| 2 | Timezone Twist | Query `Cities` table for max European timezone diff | `3` |
+| 3 | The Final Count | Arithmetic: (answer1 + answer2) × 3 | `24` |
+
+### Metric isolation
+
+Each challenge runs in its own session via the `task` parameter, which scopes the agent's initial prompt to a single challenge. This gives clean per-challenge metrics (tokens, time, cost, tool calls) without post-hoc splitting.
+
+### Setup
+
+```bash
+# 1. Install dependencies
+python -m pip install -e ".[dev]"
+python -m playwright install chromium
+
+# 2. Create test data in your Kusto cluster
+python tests/setup_kusto.py
+
+# 3. Start the test server (keep running in a separate terminal)
+python tests/test_server.py
+```
+
+### Running tests
+
+```bash
+# Run isolated sessions (one per challenge, with live output)
+python tests/run_isolated.py
+
+# Run via pytest (skips LLM tests by default)
+python -m pytest tests/ -v
+
+# Run LLM tests via pytest
+python -m pytest tests/ -v --run-llm
+```
+
+### Generating reports
+
+After a test run, generate a markdown report from the session logs:
+
+```bash
+# Report for specific sessions
+python generate_report.py --from session_20260316_223148 --to session_20260316_223956
+
+# Report for all sessions
+python generate_report.py
+```
+
+The report includes:
+- **Per-session table** — challenge, status, tool calls, tokens, cost, time
+- **Per-challenge aggregation** — totals across sessions (for multi-session cases)
+- **Tool usage breakdown** — which tools were called and how often
+- **Session details** — per-session metrics with answers and top tools
 
 ## Development
 
