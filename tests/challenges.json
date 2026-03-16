@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "number-crunch",
+    "name": "Case 1 — Number Crunch",
+    "problem": "The Numbers table in database TestChallenges contains a column called Value with the first 200 Fibonacci numbers (F(1)=1, F(2)=1, F(3)=2, ...). Your task: find the second digit of the 100th Fibonacci number.\n\nFor example, the 10th Fibonacci number is 55, and its second digit is 5.\n\nSubmit just the single digit.",
+    "training": "### KQL Tip: Accessing specific rows\n\nUse the `serialize` operator to add a row number, then filter:\n\n```kql\nNumbers\n| serialize RowNum = row_number()\n| where RowNum == 100\n```\n\n### KQL Tip: String operations\n\nUse `tostring()` to convert a number to a string, then `substring()` to extract characters:\n\n```kql\nprint SecondDigit = substring(tostring(12345), 1, 1)\n```\n\nThis returns \"2\" (0-indexed, so index 1 is the second character).",
+    "answer": "5",
+    "cluster_uri": "{cluster_uri}",
+    "database": "TestChallenges"
+  },
+  {
+    "slug": "timezone-twist",
+    "name": "Case 2 — Timezone Twist",
+    "problem": "The Cities table in database TestChallenges has columns: Name (string), Continent (string), TimezoneOffsetHours (int).\n\nFind the two cities that are BOTH on the continent \"Europe\" and have the LARGEST timezone difference between them. Submit the absolute difference in hours.\n\nFor example, if one city is UTC+1 and another is UTC+3, the difference is 2.",
+    "training": "### KQL Tip: Self-joins\n\nTo compare rows within the same table, use a self-join:\n\n```kql\nCities\n| join kind=inner Cities on Continent\n| where Name != Name1\n```\n\n### KQL Tip: Aggregation with abs()\n\nUse `abs()` for absolute values:\n\n```kql\n| extend Diff = abs(TimezoneOffsetHours - TimezoneOffsetHours1)\n| summarize MaxDiff = max(Diff)\n```",
+    "answer": "3",
+    "cluster_uri": "{cluster_uri}",
+    "database": "TestChallenges"
+  },
+  {
+    "slug": "final-count",
+    "name": "Case 3 — The Final Count",
+    "problem": "Take your answers from Cases 1 and 2. Let A be the answer to Case 1 and B be the answer to Case 2.\n\nCompute: (A + B) × 3\n\nSubmit the result as a number.\n\nHint: you don't need Kusto for this one — just arithmetic.",
+    "training": "### Tip: Using Python for arithmetic\n\nYou can use the powershell tool to run Python:\n\n```python\npython -c \"print((5 + 3) * 3)\"\n```\n\nThis is useful when the challenge is purely computational.",
+    "answer": "24",
+    "cluster_uri": "{cluster_uri}",
+    "database": "TestChallenges"
+  }
+]
