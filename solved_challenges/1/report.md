@@ -29,6 +29,9 @@
 
 ## Per-Case Breakdown
 
+<details>
+<summary>Case 1: To bill or not to bill? ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
+
 ### Case 1: To bill or not to bill? (18m, 80 tools)
 
 **Task:** Find the correct April billing total for Digitown.
@@ -39,7 +42,12 @@
 
 **Difficulty:** Medium. The agent initially only fixed duplicates and got a wrong answer. Checking hints revealed the "positive thinking" clue pointing to negative values.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 2: Catch the Phishermen! ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 2: Catch the Phishermen! (11m, 51 tools)
 
@@ -51,7 +59,12 @@
 
 **Difficulty:** Easy-Medium. Agent identified the pattern quickly by analyzing call frequency, unique destinations, and disconnect behavior.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 3: Return stolen cars! ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 3: Return stolen cars! (8m, 31 tools)
 
@@ -63,7 +76,12 @@
 
 **Difficulty:** Easy. Clean application of the training material's time-window join technique.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 4: Triple trouble! ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 4: Triple trouble! (8m, 31 tools)
 
@@ -75,7 +93,12 @@
 
 **Difficulty:** Easy. Statistical outlier detection on traffic ratios was straightforward.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 5: Blast into the past ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 5: Blast into the past (8m, 33 tools)
 
@@ -87,7 +110,12 @@
 
 **Difficulty:** Medium. Required understanding the backup/delete lifecycle and using time-series analysis.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 6: Hack this rack! ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 6: Hack this rack! (65m+, 177 tools, 4 iterations)
 
@@ -106,7 +134,12 @@
 
 **Difficulty:** Hard. The cipher-within-a-cipher structure (decode poem → solve riddle → find artwork → read image → log into website) was the most complex chain in the challenge. The image-reading step is fundamentally beyond current LLM capabilities without specialized OCR tools.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 7: Mission 'Connect' ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 7: Mission 'Connect' (9m, 35 tools)
 
@@ -118,7 +151,12 @@
 
 **Difficulty:** Easy-Medium. Clean application of geo-hashing from the training material.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 8: Catchy Run ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 8: Catchy Run (78m, 181 tools, 2 iterations)
 
@@ -137,7 +175,12 @@
 
 **Difficulty:** Hard. Multi-layered puzzle combining cryptography, data analysis, and spatial clustering.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 9: Network Hunch ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 9: Network Hunch (15m, 58 tools)
 
@@ -149,7 +192,12 @@
 
 **Difficulty:** Medium. Required understanding graph traversal in KQL and the subtlety of topological vs. actual path matching.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 10: It's a sEnd game ⚠️ CONTAINS SPOILERS — OPEN AT YOUR OWN RISK</summary>
 
 ### Case 10: It's a sEnd game (16m, 61 tools)
 
@@ -164,6 +212,8 @@
 **Key insight:** The decryption key for each message was the concatenation of all active tokens at the moment the message was sent. Token lifecycle (add on operation start, remove on complete, clear on session reset) had to be tracked precisely.
 
 **Difficulty:** Medium-Hard. Required combining session-state tracking with the decryption pipeline from Case 8.
+
+</details>
 
 ## Analysis
 
