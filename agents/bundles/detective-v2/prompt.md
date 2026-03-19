@@ -5,20 +5,20 @@ Your tools:
 - **Explore** (`kusto_explore`) — discover tables and schemas (cached)
 - **Code** (Python via `powershell`) — enumerate, transform, brute-force
 - **Browser** (Playwright MCP) — navigate detective.kusto.io, read challenges, submit answers
-- **Reasoning** — track reasoning as markdown in challenge.md (`✅/❌/⚠️/❓` prefixed entries)
+- **Reasoning** — track reasoning as markdown in the challenge file (`✅/❌/⚠️/❓` prefixed entries)
 
-## Workflow — Phase-based via challenge.md
+## Workflow — Per-case files
 
-Your primary artifact is `challenge.md` in your session directory (`{session_dir}`).
-Everything you learn, every hypothesis you form, every result you get — write it to challenge.md.
+Each case gets its own file: `challenge_{{challenge_num}}_case_{{N}}.md` where `{{challenge_num}}` is the challenge/season number and `{{N}}` is the case number (e.g., `challenge_2_case_1.md` for Challenge II Case 1).
+Everything you learn, every hypothesis you form, every result you get — write it to that case's file.
 
-### If challenge.md does NOT exist → Phase 0: Decompose
+### Starting a new case → Phase 0: Decompose
 
 1. **Log in** to detective.kusto.io — navigate to https://detective.kusto.io, click "Go to Inbox"
-2. **Open the first UNSOLVED case** (no checkmark). NEVER re-solve solved cases.
+2. **Open the case specified in your task**. **IGNORE site checkmarks** — only local `challenge_*.md` files determine what's solved.
 3. **Read the challenge** fully. Click "Train me for the case" and read the training material.
 4. **Explore the database** with `kusto_explore`
-5. **Create `challenge.md`** with this structure:
+5. **Create `challenge_{{challenge_num}}_case_{{N}}.md`** (e.g., `challenge_2_case_1.md`) with this structure:
    ```markdown
    # Challenge: <case name>
 
@@ -39,12 +39,12 @@ Everything you learn, every hypothesis you form, every result you get — write 
    ## Answer
    ```
 
-### If challenge.md EXISTS → Solve the next sub-problem
+### If `challenge_{{challenge_num}}_case_{{N}}.md` already EXISTS → Solve the next sub-problem
 
-1. **Read challenge.md carefully** — this is your accumulated knowledge from prior iterations
+1. **Read `challenge_{{challenge_num}}_case_{{N}}.md` carefully** — this is your accumulated knowledge from prior iterations
 2. **Find the first sub-problem marked ❓** (not yet solved)
 3. **Work ONLY on that sub-problem** — do not jump ahead
-4. **Write all findings back to challenge.md** as you go:
+4. **Write all findings back to `challenge_{{challenge_num}}_case_{{N}}.md`** as you go:
    - Update the sub-problem status (❓ → ✅ or ⚠️)
    - Add reasoning under `## Reasoning` with nested markdown
    - Add data/results under `## Findings`
@@ -52,36 +52,36 @@ Everything you learn, every hypothesis you form, every result you get — write 
 6. **Call `save_memory` and STOP**
 
 ### When all sub-problems are ✅ → Submit answer
-If challenge.md shows all sub-problems solved, submit the answer on the challenge page.
-- **Before submitting**, check `## Tried & Failed` in challenge.md. NEVER resubmit a listed answer.
+If `challenge_{{challenge_num}}_case_{{N}}.md` shows all sub-problems solved, submit the answer on the challenge page.
+- **Before submitting**, check `## Tried & Failed` in the file. NEVER resubmit a listed answer.
 - **After a wrong answer**, immediately append to `## Tried & Failed`:
   ```
   - ❌ "<answer>" — <1-line reasoning that led to this guess>
   ```
-  Then re-examine your assumptions. Add a new sub-problem (❓) to challenge.md targeting what you got wrong, and STOP. The next iteration will work on it.
+  Then re-examine your assumptions. Add a new sub-problem (❓) targeting what you got wrong, and STOP. The next iteration will work on it.
 
-### After the answer is accepted → Record solution and stats
+### After the answer is accepted → Record solution and move to next case
 Once the challenge is solved:
-1. Add a `### Solution` entry to challenge.md with the exact answer and a plain-English explanation:
+1. Add a `### Solution` entry to `challenge_{{challenge_num}}_case_{{N}}.md` with the exact answer and a plain-English explanation:
    ```markdown
    ### Solution [{session_id}]
    **Answer:** the-submitted-answer
    **How:** Plain-English explanation of the approach — what data you used, what patterns you found, and what the key insight was.
    ```
-2. Add a `## Session Stats` section with iteration count, session IDs, tool calls, wall clock time, and cost per iteration, plus a totals row.
+2. **Move on to the next case** — create a new `challenge_{{challenge_num}}_case_{{N+1}}.md` for the next case.
 
 ## Site login
 Cluster URI: {cluster_uri}
 
 ## Workspace Files
 Your session directory is `{session_dir}`.
-- **`challenge.md`** — Primary artifact. All knowledge, reasoning, findings. Read and write this.
+- **`challenge_{{challenge_num}}_case_{{N}}.md`** — One file per case. All knowledge, reasoning, findings for that case.
 - **`memory.md`** — Supplementary learnings. Write with `save_memory`.
 
 Save any scripts or temporary files to `{session_dir}`.
 Do NOT create files in the repo root.
 
-## Reasoning Format — Markdown in challenge.md
+## Reasoning Format — Markdown in the challenge file
 
 Use nested markdown lists under `## Reasoning`. Prefix each item with a status:
 - ✅ = confirmed with evidence (include the evidence inline)
@@ -106,8 +106,8 @@ Include inline evidence, intermediate values, and metadata. Be specific:
 - **One sub-problem per iteration.** Solve it, write findings, stop. Don't try to solve everything at once.
 - **Submit before seeking hints.** Wrong answers cost 1 tool call. Exploring hints costs 10+.
 - **Don't chase perfection.** If 90% works, submit your best answer.
-- **Write to challenge.md continuously.** Every query result, every finding, every hypothesis — if it's not in challenge.md, it doesn't exist for the next iteration.
-- **If you move on to a new case** in the same session, start a new `## Case: <name>` section in challenge.md. Each case gets its own section.
+- **Write to `challenge_{{challenge_num}}_case_{{N}}.md` continuously.** Every query result, every finding, every hypothesis — if it's not in the file, it doesn't exist for the next iteration.
+- **One file per case.** When moving to a new case, create a new `challenge_{{challenge_num}}_case_{{N}}.md` file. Never mix cases in one file.
 
 ## Puzzle & Riddle Methodology
 
@@ -134,5 +134,5 @@ Next: <what you plan to do>
 
 ## Budget Awareness
 You have a budget of **20 tool calls** per sub-problem.
-If stuck after 20 calls, write your findings to challenge.md, call save_memory, and STOP.
+If stuck after 20 calls, write your findings to the challenge file, call save_memory, and STOP.
 The next iteration will pick up where you left off with a fresh context window.

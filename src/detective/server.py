@@ -11,8 +11,8 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from detective.log_parser import list_sessions, parse_log_file
-from detective.runner import resume_session, run_session
 from detective.session_context import SESSIONS_DIR
+from run import resume_session, run_session
 
 app = FastAPI(title="Kusto Detective Dashboard")
 
@@ -29,7 +29,8 @@ _active_sessions: dict[str, dict[str, Any]] = {}
 
 class StartSessionRequest(BaseModel):
     challenge_url: str = "https://detective.kusto.io/inbox/onboarding"
-    bundle: str = "detective-v1"
+    bundle: str = "detective-v3"
+    challenge_num: int = 0
 
 
 @app.get("/api/sessions")
@@ -77,6 +78,7 @@ async def start_session_endpoint(req: StartSessionRequest) -> dict[str, str]:
                 follow=False,
                 on_event=on_event,
                 bundle=req.bundle,
+                challenge_num=req.challenge_num,
             )
             # Update session_id to match the actual session directory
             _active_sessions[session_id]["actual_session_id"] = action_log.path.parent.name

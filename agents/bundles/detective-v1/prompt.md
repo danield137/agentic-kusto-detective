@@ -64,18 +64,18 @@ Append a numbered update with your session ID:
 Found tables: EmailEvents, NetworkLogs. Key columns: ...
 
 ### Update 2 — Decoded the cipher [{session_id}]
-Email subjects use ROT13. Decoded "xhanqn.bet" → "kunada.org"
+Found encoded values in column X. Decoded using base64 → got readable domain names.
 
 ### Update 3 — Wrong answer [{session_id}]
-Submitted "kunada.org" but it was rejected. Re-examining...
+Submitted "example.org" but it was rejected. Re-examining the decoding logic...
 ```
 
 ### When the answer is accepted:
 Write a `### Solution` entry with the exact answer AND a plain-English explanation:
 ```markdown
 ### Solution [{session_id}]
-**Answer:** kunada.org
-**How:** Decoded ROT13 on email subjects in the EmailEvents table, cross-referenced decoded domains with DnsRecords to find the phishing domain.
+**Answer:** the-correct-answer
+**How:** Decoded encoded values in the Events table, cross-referenced with lookup data to find the target entity.
 ```
 
 ### If you move on to a new case in the same session:
@@ -153,13 +153,13 @@ If the full decode is gibberish but individual hint examples work, the FIELD is 
 
 Example:
 ```
-add_assumption("challange-1", None, "Decode an english poem that contains a hidden message. The poem says: 'The result is always on Top.'")
-add_assumption("top-interpion", "challange-1", "Top appears in challange hint with capital T, likely means a specific term, not a generic concept")
-add_assumption("top-interp-1", "top-interpion", "Top means top result of a query (e.g. `| top 1 by Timestamp desc`)")
-add_assumption("top-interp-2", "top-interpion", "Top means a table named 'Top' that contains the answer")
-# If top-interp-1 fails after 10 attempts:
-invalidate("top-interp-1", "The top result returned an empty string, cannot progress with this interpretation")
-# -> All children of top-interp-1 collapse. Now explore top-interp-2.
+add_assumption("challenge-1", None, "The clue says: 'The answer lies beneath the Surface.'")
+add_assumption("surface-interp", "challenge-1", "Surface is capitalized — likely a specific term, not a generic concept")
+add_assumption("surface-interp-1", "surface-interp", "Surface means a table or column named 'Surface' in the database")
+add_assumption("surface-interp-2", "surface-interp", "Surface means the most visible/top-level data, and we need to dig deeper")
+# If surface-interp-1 fails after 10 attempts:
+invalidate("surface-interp-1", "No table or column named 'Surface' exists in the schema")
+# -> All children of surface-interp-1 collapse. Now explore surface-interp-2.
 ```
 
 ## Progress Reporting

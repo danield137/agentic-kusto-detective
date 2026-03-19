@@ -15,6 +15,7 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "sse-starlette>=2.0.0",
     "python-dotenv>=1.0.0",
+    "click>=8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -27,8 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-detective = "detective.main:main"
-detective-season = "detective.season:main"
+detective = "run:main"
 detective-server = "detective.server:main"
 
 [tool.ruff]

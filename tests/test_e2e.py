@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 import uvicorn
 
-from detective.runner import run_session
+from run import run_session
 
 TESTS_DIR = Path(__file__).parent
 STATE_PATH = TESTS_DIR / "test_state.json"

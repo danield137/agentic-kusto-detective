@@ -22,15 +22,15 @@ python -m ruff check src/
 # Test
 python -m pytest tests/ -v
 
-# Run agent against a challenge (single session)
-python -m detective.main --follow <challenge_url>
+# Run agent (single iteration)
+python run.py ralph --challenge-num 1 -i 1
 
-# Run with a specific bundle
-python -m detective.main --bundle detective-v2 --follow <challenge_url>
+# Run multi-iteration loop
+python run.py ralph --challenge-num 1 -i 10
+python run.py ralph --seed session_20260311_034640 --bundle detective-v2 -i 5
 
-# Run multi-iteration loop (Ralph loop)
-python ralph.py 10
-python ralph.py 5 --seed session_20260311_034640 --bundle detective-v2
+# Resume an interrupted session
+python run.py resume <session_id>
 ```
 
 ### Environment Variables
@@ -41,10 +41,10 @@ python ralph.py 5 --seed session_20260311_034640 --bundle detective-v2
 ## Architecture
 
 - **Agent framework:** GitHub Copilot SDK — `CopilotClient` + `create_session()` with custom tools
-- **Model:** Claude Opus 4.6 with 1M context (configured in `runner.py`)
+- **Model:** Claude Opus 4.6 with 1M context (configured in `run.py`)
 - **Agent bundles:** Declarative configs under `agents/bundles/{name}/` — each contains `prompt.md` (system prompt template), `config.json` (metadata + seed files), `skills/` (with scripts), `knowledge/`, and `mcps.json`
 - **Bundle loader:** `src/detective/bundle_loader.py` — loads a bundle into an `AgentBundle` dataclass
-- **Ralph loop:** `ralph.py` — multi-iteration runner that distills each session's findings (reasoning tree, key findings, memory) and seeds the next iteration
+- **Ralph:** `run.py` — single source of truth for all session logic. Contains the session engine (`run_session`, `resume_session`) and the multi-iteration loop that distills findings and seeds the next iteration
 - **Kusto auth:** `DefaultAzureCredential` — uses locally signed-in Azure identity
 - **Browser:** Playwright Chromium — agent reads challenges and submits answers via detective.kusto.io
 - **Tools:** Defined with `@define_tool` decorator + Pydantic models for parameter schemas

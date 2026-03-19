@@ -126,47 +126,55 @@ def _slugify(name: str) -> str:
 
 
 def _identify_cases(session_dir: Path) -> list[dict]:
-    """Identify case(s) from challenge.md in a session directory.
+    """Identify case(s) from challenge files in a session directory.
+
+    Looks for per-case files (``challenge_*.md``) first, falling back to
+    the legacy single ``challenge.md``.
 
     Returns a list of dicts with keys: name, slug, answer, solution_summary.
-    Most sessions have exactly one case.
     """
-    challenge_path = session_dir / "challenge.md"
-    if not challenge_path.exists():
+    # Collect all challenge files: per-case (challenge_1.md) + legacy (challenge.md)
+    challenge_files = sorted(session_dir.glob("challenge_*.md"))
+    legacy = session_dir / "challenge.md"
+    if not challenge_files and legacy.exists():
+        challenge_files = [legacy]
+    if not challenge_files:
         return []
 
-    content = challenge_path.read_text(encoding="utf-8")
     cases: list[dict] = []
+    for challenge_path in challenge_files:
+        content = challenge_path.read_text(encoding="utf-8")
 
-    # Find all case headers
-    headers = list(_CASE_HEADER_RE.finditer(content))
-    if not headers:
-        # Fallback: try the first markdown heading
-        first_heading = re.match(r"^#\s+(.+)", content)
-        if first_heading:
-            name = first_heading.group(1).strip()
-            cases.append({"name": name, "slug": _slugify(name)})
+        # Find all case headers
+        headers = list(_CASE_HEADER_RE.finditer(content))
+        if not headers:
+            # Fallback: try the first markdown heading
+            first_heading = re.match(r"^#\s+(.+)", content)
+            if first_heading:
+                name = first_heading.group(1).strip()
+                cases.append({"name": name, "slug": _slugify(name)})
+            continue
 
-    for i, match in enumerate(headers):
-        name = match.group(1).strip()
-        # Get the section content (up to next case header or end)
-        start = match.end()
-        end = headers[i + 1].start() if i + 1 < len(headers) else len(content)
-        section = content[start:end]
+        for i, match in enumerate(headers):
+            name = match.group(1).strip()
+            # Get the section content (up to next case header or end)
+            start = match.end()
+            end = headers[i + 1].start() if i + 1 < len(headers) else len(content)
+            section = content[start:end]
 
-        case_info: dict = {"name": name, "slug": _slugify(name)}
+            case_info: dict = {"name": name, "slug": _slugify(name)}
 
-        # Look for solution answer
-        sol_match = _SOLUTION_RE.search(section)
-        if sol_match:
-            case_info["answer"] = sol_match.group(1).strip()
+            # Look for solution answer
+            sol_match = _SOLUTION_RE.search(section)
+            if sol_match:
+                case_info["answer"] = sol_match.group(1).strip()
 
-        # Look for solution explanation
-        how_match = _SOLUTION_HOW_RE.search(section)
-        if how_match:
-            case_info["solution_summary"] = how_match.group(1).strip()
+            # Look for solution explanation
+            how_match = _SOLUTION_HOW_RE.search(section)
+            if how_match:
+                case_info["solution_summary"] = how_match.group(1).strip()
 
-        cases.append(case_info)
+            cases.append(case_info)
 
     return cases
 

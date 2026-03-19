@@ -23,32 +23,23 @@ export DETECTIVE_CLUSTER_URI=https://yourcluster.region.dev.kusto.windows.net/
 
 Azure auth uses `DefaultAzureCredential` — sign in via Azure CLI (`az login`) or VS Code.
 
-### Run a single session
+### Run the agent
 
 ```bash
-# Run the agent against a challenge
-python -m detective.main https://detective.kusto.io/inbox/onboarding
+# Single iteration on challenge 1
+python run.py ralph --challenge-num 1 -i 1
 
-# Live-stream agent reasoning and tool calls
-python -m detective.main --follow https://detective.kusto.io/inbox/onboarding
+# Multi-iteration loop (auto-seeds each from the last)
+python run.py ralph --challenge-num 1 -i 10
 
-# Use a specific agent bundle
-python -m detective.main --bundle detective-v2 --follow https://detective.kusto.io/inbox/onboarding
-```
-
-### Run the Ralph loop (multi-iteration)
-
-For harder cases, the agent benefits from multiple attempts. The **Ralph loop** runs the agent iteratively — each session is seeded with a distilled summary of the previous one, carrying forward confirmed findings and avoiding repeated mistakes.
-
-```bash
-# Run up to 10 iterations, auto-seeding each from the last
-python ralph.py 10
-
-# Resume from a specific session
-python ralph.py 5 --seed session_20260311_034640
+# Seed from a specific session
+python run.py ralph --seed session_20260311_034640 -i 5
 
 # Use a different bundle
-python ralph.py 10 --bundle detective-v2
+python run.py ralph --bundle detective-v2 -i 10
+
+# Resume an interrupted session
+python run.py resume session_20260311_034640
 ```
 
 Each iteration:
@@ -171,7 +162,7 @@ src/detective/
 ├── server.py            # FastAPI web server with SSE
 └── season.py            # Season-level orchestration
 
-ralph.py                 # Multi-iteration loop with session distillation
+run.py                 # Multi-iteration loop with session distillation
 start.py                 # Start web dashboard (backend + frontend)
 generate_report.py       # Markdown report from session logs
 

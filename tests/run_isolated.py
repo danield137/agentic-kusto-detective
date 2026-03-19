@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from detective.runner import run_session  # noqa: E402
+from run import run_session  # noqa: E402
 
 CHALLENGES_PATH = Path(__file__).parent / "challenges.json"
 STATE_PATH = Path(__file__).parent / "test_state.json"
