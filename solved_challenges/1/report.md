@@ -12,18 +12,18 @@
 
 ## Summary
 
-| Case | Answer | Attempts | Tools | Time | LLM Calls |
-|------|--------|----------|-------|------|-----------|
-| 1 — To bill or not to bill? | `35420883.07` | 1 | 80 | 18m | 71 |
-| 2 — Catch the Phishermen! | `06784884765` | 1 | 51 | 11m | 45 |
-| 3 — Return stolen cars! | `Ave 156, Street 81` | 1 | 31 | 8m | 26 |
-| 4 — Triple trouble! | `KUANDA.ORG` | 1 | 31 | 8m | 25 |
-| 5 — Blast into the past | `https://2023storage...` | 1 | 33 | 8m | 32 |
-| 6 — Hack this rack! | `Krypto` | 4* | 177 | 65m+ | 168 |
-| 7 — Mission 'Connect' | `Barcelona` | 1 | 35 | 9m | 31 |
-| 8 — Catchy Run | `41.38467, 2.18336` | 2 | 181 | 78m | 172 |
-| 9 — Network Hunch | `MNX-71B4CC` | 1 | 58 | 15m | 55 |
-| 10 — It's a sEnd game | `162613428` | 1 | 61 | 15m | 59 |
+| Case | Attempts | Tools | Time | LLM Calls |
+|------|----------|-------|------|-----------|
+| 1 — To bill or not to bill? | 1 | 80 | 18m | 71 |
+| 2 — Catch the Phishermen! | 1 | 51 | 11m | 45 |
+| 3 — Return stolen cars! | 1 | 31 | 8m | 26 |
+| 4 — Triple trouble! | 1 | 31 | 8m | 25 |
+| 5 — Blast into the past | 1 | 33 | 8m | 32 |
+| 6 — Hack this rack! |  4* | 177 | 65m+ | 168 |
+| 7 — Mission 'Connect' | 1 | 35 | 9m | 31 |
+| 8 — Catchy Run | 2 | 181 | 78m | 172 |
+| 9 — Network Hunch | 1 | 58 | 15m | 55 |
+| 10 — It's a sEnd game | 1 | 61 | 15m | 59 |
 
 \* Case 6 required human intervention to provide the passcode ("stopkusto") that the agent could not read from an image.
 
