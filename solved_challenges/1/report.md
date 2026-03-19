@@ -201,14 +201,14 @@ The `where` → `summarize` → `extend` pattern was the agent's go-to analytica
 | `geo_distance_2points()` | 8 | Distance calculation — Cases 7, 8 |
 
 #### Query error breakdown (18 errors, 6.3%)
-| Error type | Count | Cause |
-|------------|-------|-------|
-| Memory/runaway (E_LOW_MEMORY) | 5 | Queries on 24M+ row tables without sufficient filtering |
-| Type mismatch (string comparison) | 4 | Comparing string fields without explicit casts |
-| Semantic (bad function/property) | 5 | Using wrong column names, unknown functions, graph-match syntax |
-| Regex errors | 1 | Invalid regex in `extractall()` |
-| Join errors | 2 | Non-equality joins, runaway join output |
-| Syntax | 1 | Graph-match path syntax |
+| Error type | Count | Cause | Recovery |
+|------------|-------|-------|----------|
+| Memory/runaway (E_LOW_MEMORY) | 5 | Queries on 24M+ row tables without sufficient filtering | Added `where` filters before joins; reduced time windows |
+| Type mismatch (string comparison) | 4 | Comparing string fields without explicit casts | Added `tostring()` or `toint()` casts |
+| Semantic (bad function/property) | 5 | Wrong column names, unknown functions, graph-match syntax | Re-explored schema with `kusto_explore`, rewrote query |
+| Regex errors | 1 | Invalid regex in `extractall()` | Fixed regex to include capturing group |
+| Join errors | 2 | Non-equality joins, runaway join output | Switched to `lookup` or added pre-aggregation step |
+| Syntax | 1 | Graph-match path syntax | Abandoned `graph-match`, used iterative joins instead |
 
 Memory errors came from Cases 7-8 (large flight/runs tables). The agent learned to add `where` filters before joins to avoid these. Type mismatches were a recurring issue — KQL's strict typing caught the agent several times.
 
