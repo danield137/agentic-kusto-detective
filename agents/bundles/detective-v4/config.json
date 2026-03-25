@@ -1,0 +1,9 @@
+{
+  "seed_files": [
+    "challenge_*.md",
+    "memory.md",
+    "handoff.md",
+    "iteration_summary.md",
+    "worklog.md"
+  ]
+}

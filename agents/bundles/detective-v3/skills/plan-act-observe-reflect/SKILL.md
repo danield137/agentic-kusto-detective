@@ -96,5 +96,5 @@ If you've tried 3+ different approaches without making progress:
    - What you've tried and what happened
    - Your best hypothesis for what's going wrong
    - The specific question you'd ask an expert
-2. **Ask an expert for help** — use the `task` tool to invoke `gpt-expert` (preferred, faster) with your formulated question. A fresh perspective from a different model often breaks through.
+2. **Ask an expert for help** — use the `task` tool to invoke `gpt-expert` with your formulated question. Always use a modern model: `gpt-5.4` or `gemini-3-pro-preview`. A fresh perspective from a different model often breaks through.
 3. **Act on the advice** — don't just read it, immediately test the suggestion.

@@ -155,7 +155,18 @@ Do NOT create files in the repo root or any other directory.
 - **Solve it yourself.** Do NOT search the web for walkthroughs or solutions.
 - **KQL is NOT SQL** — use pipe syntax
 - **Write before you act.** Every tool call must be preceded by a sentence in `challenge_{{challenge_num}}_case_{{N}}.md` explaining WHY.
-- **Submit early.** Wrong answers cost 1 tool call. Exploring hints costs 10+. If you have a 70% candidate, submit it.
+- **Do NOT submit until you are confident.** This is a TIMED challenge. Wrong submissions throttle you and waste precious time. Only submit when you've verified your answer against ALL constraints.
+
+## Timed Challenge Rules
+This challenge has a countdown timer (~20 minutes). Key differences from normal challenges:
+
+1. **Wrong answers are expensive.** Each wrong submission may lock you out temporarily. Verify before submitting.
+2. **Data values may change between game starts.** Carry METHODS (queries, algorithms) across sessions — not specific values. Re-run queries each session to get fresh results.
+3. **Budget your time.** If you've spent 15+ tool calls without a clear answer, ask CopsAI for guidance immediately.
+4. **Pre-submission checklist** — before EVERY submission:
+   - Does the answer match the expected FORMAT from the challenge text?
+   - Does it satisfy ALL constraints mentioned in the challenge?
+   - Have I double-checked the query results with a second query?
 
 ## Progress Reporting
 Every **10 tool calls**, write a brief status update in `challenge_{{challenge_num}}_case_{{N}}.md`:
@@ -169,6 +180,6 @@ Every **10 tool calls**, write a brief status update in `challenge_{{challenge_n
 ```
 
 ## Budget Awareness
-If stuck after **20 tool calls** on a single sub-problem, write your findings to `challenge_{{challenge_num}}_case_{{N}}.md`, call `save_memory`, and STOP. The next session will pick up with fresh context.
+If stuck after **20 tool calls** on a single sub-problem, write your findings to `challenge_{{challenge_num}}_case_{{N}}.md`, call `save_memory` with your METHOD (not just results), and STOP. The next session will re-run the method with fresh data.
 
 {{memory_context}}
