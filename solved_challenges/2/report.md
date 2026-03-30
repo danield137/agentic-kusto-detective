@@ -10,19 +10,31 @@
 **Total LLM calls:** ~538
 **Total SDK credits:** 3,228
 
+## Key Learnings
+
+- **When a hint says "use H3 cells", use H3 cells.** The agent ignored an explicit geospatial hint and used cross-joins instead, landing at the wrong location. 69 tool calls wasted before correcting. Hints are instructions, not suggestions.
+- **5-step puzzle chains are at the limit of reliable agent reasoning.** Primes → URL → tree census → street view → song reference → decryption. One wrong step (wrong geospatial method) cascaded into total failure. The agent solved it, but barely.
+- **The hardest case consumed 50% of all tool calls.** 325 tools on one case vs 166 on the other three combined. Puzzle difficulty follows a power law — budget accordingly.
+- **Election fraud detection was elegant.** The agent identified bot-spam voting by analyzing vote rate per IP per second — a genuinely creative statistical approach that required ~20 queries to converge on.
+- **Same image wall, different puzzle.** Confirms Challenge 1's finding — this isn't a one-off. Any puzzle requiring text-from-image will need human intervention or dedicated OCR tooling.
+- **Memory carry-over from Challenge 1 worked.** The agent reused navigation patterns and KQL techniques learned in Challenge 1. Cross-challenge learning is real.
+
 ## Summary
 
-| Case | Answer | Attempts | Tools | Time | LLM Calls |
-|------|--------|----------|-------|------|-----------|
-| 1 — The rarest book is missing! | `4242` | 1 | 25 | 7m | 20 |
-| 2 — Election fraud? | `Kastor: 50.8%, Gaul: 38.6%, Willie: 6.6%, Poppy: 4.0%` | 1 | 76 | 20m | 73 |
-| 3 — Bank robbery | `Avenue 42, Street 258` | 1 | 65 | 16m | 59 |
-| 4 — Ready to play? | `wytaPUJM!PS:2,7,17,29,42,49,58,59,63` | 3* | 325 | 85m+ | 239 |
-| 5 — Big heist | `2022-12-17, -3.3801, 58.9689` | 1 | 112 | 25m | 104 |
+| Case | Model | Bundle | Attempts | Tools | Time | LLM Calls |
+|------|-------|--------|----------|-------|------|-----------|
+| 1 — The rarest book is missing! | Opus 4.6 1M | v3 | 1 | 25 | 7m | 20 |
+| 2 — Election fraud? | Opus 4.6 1M | v3 | 1 | 76 | 20m | 73 |
+| 3 — Bank robbery | Opus 4.6 1M | v3 | 1 | 65 | 16m | 59 |
+| 4 — Ready to play? | Opus 4.6 1M | v3 | 3* | 325 | 85m+ | 239 |
+| 5 — Big heist | Opus 4.6 1M | v3 | 1 | 112 | 25m | 104 |
 
-\* Case 4 required human intervention to provide the decrypt key ("ashes to ashes") visible on the El Puente building mural. Fair tool count to the image-reading wall: ~48.
+\* Case 4 required human intervention to provide a decrypt key visible on a building mural. Fair tool count to the image-reading wall: ~48.
 
 ## Per-Case Breakdown
+
+<details>
+<summary>Case 1: The rarest book is missing! (7m, 25 tools) ⚠️ SPOILERS</summary>
 
 ### Case 1: The rarest book is missing! (7m, 25 tools)
 
@@ -34,7 +46,12 @@
 
 **Difficulty:** Easy. Straightforward join + weight comparison.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 2: Election fraud? (20m, 76 tools) ⚠️ SPOILERS</summary>
 
 ### Case 2: Election fraud? (20m, 76 tools)
 
@@ -48,7 +65,12 @@
 
 **Difficulty:** Medium. The fraud mechanism was subtle — no obvious spikes or duplicate IDs.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 3: Bank robbery (16m, 65 tools) ⚠️ SPOILERS</summary>
 
 ### Case 3: Bank robbery (16m, 65 tools)
 
@@ -62,7 +84,12 @@
 
 **Difficulty:** Medium. Required temporal reasoning across 66M traffic records.
 
+</details>
+
 ---
+
+<details>
+<summary>Case 4: Ready to play? (85m+, 325 tools, 3 iterations) ⚠️ SPOILERS</summary>
 
 ### Case 4: Ready to play? (85m+, 325 tools, 3 iterations)
 
@@ -82,7 +109,12 @@
 
 **Difficulty:** Hard. The longest puzzle chain in the challenge (prime numbers → URL → tree census → geospatial → street view → song reference → decryption).
 
+</details>
+
 ---
+
+<details>
+<summary>Case 5: Big heist (25m, 112 tools) ⚠️ SPOILERS</summary>
 
 ### Case 5: Big heist (25m, 112 tools)
 
@@ -95,6 +127,8 @@
 **What the agent struggled with:** Finding the 4-clique among 220K users required multiple query strategies. Initial approaches (users with exactly 3 DM contacts, channels with exactly 4 members) returned too many candidates. The breakthrough was filtering for users whose entire activity was confined to a single channel.
 
 **Difficulty:** Hard. Combined graph analysis on large chat data with a multi-step clue chain (IPs → websites → historical references → coordinates).
+
+</details>
 
 ## Analysis
 

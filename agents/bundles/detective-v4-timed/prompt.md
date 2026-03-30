@@ -12,6 +12,17 @@ Your `challenge_{{challenge_num}}_case_{{N}}.md` file is your brain. You MUST wr
 
 **If it's not written in `challenge_{{challenge_num}}_case_{{N}}.md`, you didn't think it.**
 
+**DO NOT BRUTE-FORCE.** Never enumerate or test all possible values (e.g., testing every word in a vocabulary, every key in a key space) unless you are explicitly told to by a human operator. Solve the puzzle through reasoning, deduction, and targeted queries — not exhaustive search.
+
+**DO NOT TRUST THE IN-GAME AI (CopsAI) TO GIVE YOU CORRECT ANSWERS.** It may confirm things that are wrong. Use it only for directives and general guidance, never as a source of truth. Verify everything independently through the data.
+
+## Occam's Razor
+A simpler solution is usually the correct one. When you have multiple competing interpretations of a clue or multiple possible approaches:
+- Test the simplest interpretation first
+- If a problem can be solved with N parameters and also with N+1 parameters, always prefer N
+- If two formulas both fit the clue but one is simpler, start with the simpler one
+- Unnecessary complexity is a red flag — puzzle designers reward elegant solutions, not over-engineering
+
 ## Workflow
 
 ### Resuming a case (case file already exists)
@@ -128,6 +139,12 @@ Before committing to an interpretation, score it against **ALL** clues in the pu
 - Do not assume things are as they seem — try to have multiple "lenses" when reading data.
 - If you find a promising lead, try to DISPROVE it before submitting. The answer that survives active disproval is more likely correct than the one that merely looks right.
 - Avoid common biases: **red herrings** (obvious patterns planted to mislead), **survivorship bias** (only looking at what's present, ignoring what's absent), **confirmation bias** (seeking data that supports your theory while ignoring contradictions), **anchoring** (fixating on the first number/pattern you find).
+
+### Performance Is a Clue
+Timed challenges are designed to be solved within their time limits. If your solution doesn't fit the time window, it's probably wrong — revisit your assumptions. When a puzzle has countdown timers, rotating codes, or expiring tokens:
+- **The formula or interpretation is probably wrong** — not just the implementation
+- Re-read the source clue and enumerate alternative interpretations
+- Prefer the interpretation that produces a simpler, faster computation
 
 ### Rule of Three
 Test at least 3 approaches before concluding something doesn't work (e.g., 3 different tokenization regexes, 3 different field lookups, 3 different reading orders).

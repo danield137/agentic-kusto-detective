@@ -2,9 +2,13 @@
 
 AI agent that solves [Kusto Detective Agency](https://detective.kusto.io/) challenges autonomously — reads challenge pages via browser, queries data with KQL, reasons through puzzles, and submits answers.
 
-Built with [GitHub Copilot SDK](https://github.com/github/copilot-sdk) + Claude Opus 4.6 (1M context).
+Built with [GitHub Copilot SDK](https://github.com/github/copilot-sdk) + Claude Opus 4.6 (1M context) + GPT-5.4.
 
-**Season 1: ✅ Complete** (10/10 cases solved)
+| Season | Status | Cases | Model(s) | Report |
+|--------|--------|-------|----------|--------|
+| 1 — Echoes of Deception | ✅ Complete | 10/10 | Opus 4.6 1M | [Report](solved_challenges/1/report.md) |
+| 2 — New Shadows Over Digitown | ✅ Complete | 5/5 | Opus 4.6 1M | [Report](solved_challenges/2/report.md) |
+| 3 — Call of the Cyber Duty | ✅ Complete | 10/10 | Opus 4.6 1M + GPT-5.4 | [Report](solved_challenges/3/report.md) |
 
 ## Quick Start
 

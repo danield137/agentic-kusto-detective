@@ -6,7 +6,7 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
-    "github-copilot-sdk>=0.1.0",
+    "github-copilot-sdk>=0.2.0",
     "azure-kusto-data>=4.6.0",
     "azure-identity>=1.17.0",
     "playwright>=1.49.0",

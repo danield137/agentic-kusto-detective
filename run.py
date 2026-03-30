@@ -26,8 +26,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from copilot import CopilotClient, SessionConfig  # noqa: E402
-from copilot.types import CustomAgentConfig, ResumeSessionConfig  # noqa: E402
+from copilot import CopilotClient, CustomAgentConfig, PermissionHandler  # noqa: E402
 
 from detective.action_log import ActionLog, set_log  # noqa: E402
 from detective.bundle_loader import AgentBundle, load_bundle  # noqa: E402
@@ -336,6 +335,7 @@ async def run_session(
     seed_from: str = "",
     task: str = "",
     challenge_num: int = 0,
+    model: str = "",
 ) -> ActionLog:
     """Run a detective agent session against a single challenge.
 
@@ -375,7 +375,8 @@ async def run_session(
 
     prompt_text = _build_system_prompt(agent_bundle, ctx, challenge_num=challenge_num)
 
-    action_log = ActionLog(log_path=ctx.log_path, follow=follow, model=MODEL)
+    _model = model or MODEL
+    action_log = ActionLog(log_path=ctx.log_path, follow=follow, model=_model)
     set_log(action_log)
     session_id = ctx.session_id
 
@@ -383,48 +384,46 @@ async def run_session(
     await client.start()
 
     try:
-        session_config: SessionConfig = {
-            "model": MODEL,
-            "system_message": {"mode": "replace", "content": prompt_text},
-            "tools": agent_bundle.tools,
-            "excluded_tools": ["store_memory"],
-            "working_directory": str(ctx.session_dir),
-            "custom_agents": [
-                CustomAgentConfig(
-                    name="gpt-expert",
-                    display_name="GPT Expert",
-                    description=(
-                        "Ask GPT for a second opinion when stuck. "
-                        "Formulate a clear question describing what "
-                        "you've tried and what went wrong."
-                    ),
-                    prompt=EXPERT_SYSTEM,
+        _custom_agents = [
+            CustomAgentConfig(
+                name="gpt-expert",
+                display_name="GPT Expert",
+                description=(
+                    "Ask GPT for a second opinion when stuck. "
+                    "Formulate a clear question describing what "
+                    "you've tried and what went wrong."
                 ),
-                CustomAgentConfig(
-                    name="gemini-expert",
-                    display_name="Gemini Expert",
-                    description=(
-                        "Ask Gemini for a second opinion when stuck. "
-                        "Formulate a clear question describing what "
-                        "you've tried and what went wrong."
-                    ),
-                    prompt=EXPERT_SYSTEM,
+                prompt=EXPERT_SYSTEM,
+            ),
+            CustomAgentConfig(
+                name="gemini-expert",
+                display_name="Gemini Expert",
+                description=(
+                    "Ask Gemini for a second opinion when stuck. "
+                    "Formulate a clear question describing what "
+                    "you've tried and what went wrong."
                 ),
-            ],
-        }
-        # MCP servers declared in bundle mcps.json
-        mcp_servers = agent_bundle.mcps.get("servers", {})
-        if mcp_servers:
-            session_config["mcp_servers"] = mcp_servers
-        if follow:
-            session_config["streaming"] = True
+                prompt=EXPERT_SYSTEM,
+            ),
+        ]
+        mcp_servers = agent_bundle.mcps.get("servers", {}) or None
 
-        session = await client.create_session(session_config)
+        session = await client.create_session(
+            on_permission_request=PermissionHandler.approve_all,
+            model=_model,
+            system_message={"mode": "replace", "content": prompt_text},
+            tools=agent_bundle.tools,
+            excluded_tools=["store_memory"],
+            working_directory=str(ctx.session_dir),
+            custom_agents=_custom_agents,
+            mcp_servers=mcp_servers,
+            streaming=follow or None,
+        )
 
         # Persist state for resume
         save_state(
             ctx.session_dir, session_id, session.session_id,
-            challenge_url, model=MODEL, bundle=bundle,
+            challenge_url, model=_model, bundle=bundle,
         )
 
         done = asyncio.Event()
@@ -510,7 +509,7 @@ async def run_session(
                 f"\n\n⚠️ IMPORTANT — Human operator hints "
                 f"(follow these IMMEDIATELY):\n{hints}"
             )
-        await session.send({"prompt": initial_prompt})
+        await session.send(initial_prompt)
 
         # Main loop: poll for idle with activity-aware stuck detection
         _consecutive_nudges = 0
@@ -548,7 +547,7 @@ async def run_session(
                         file=sys.stderr, flush=True,
                     )
                 _activity["last"] = time.monotonic()  # reset after nudge
-                await session.send({"prompt": nudge})
+                await session.send(nudge)
                 continue
             _consecutive_nudges = 0
             done.clear()
@@ -574,7 +573,7 @@ async def run_session(
                     print(
                         f"\n⚡ Reflection checkpoint ({tc} tools)", file=sys.stderr, flush=True
                     )
-                await session.send({"prompt": reflection})
+                await session.send(reflection)
             else:
                 # Check if save_memory was called
                 if not _reflection_state["saved_memory"]:
@@ -586,7 +585,7 @@ async def run_session(
                     action_log.log_prompt(reminder)
                     if follow:
                         print("\n⚠️  Enforcing save_memory...", file=sys.stderr, flush=True)
-                    await session.send({"prompt": reminder})
+                    await session.send(reminder)
                     # We don't break here; we loop back to wait for the agent to act
                 else:
                     action_log._status = "completed"
@@ -618,6 +617,7 @@ async def resume_session(
     bundle: str = DEFAULT_BUNDLE,
     max_steps: int = 0,
     task: str = "",
+    model: str = "",
 ) -> ActionLog:
     """Resume an interrupted agent session.
 
@@ -652,39 +652,39 @@ async def resume_session(
 
     copilot_session_id = state["copilot_session_id"]
 
-    action_log = ActionLog(log_path=ctx.log_path, follow=follow, model=MODEL)
+    _model = model or MODEL
+    action_log = ActionLog(log_path=ctx.log_path, follow=follow, model=_model)
     set_log(action_log)
 
     client = CopilotClient()
     await client.start()
 
     try:
-        resume_config: ResumeSessionConfig = {
-            "model": MODEL,
-            "tools": agent_bundle.tools,
-            "streaming": follow,
-            "working_directory": str(ctx.session_dir),
-            "custom_agents": [
-                CustomAgentConfig(
-                    name="gpt-expert",
-                    display_name="GPT Expert",
-                    description="Ask GPT for a second opinion when stuck.",
-                    prompt=EXPERT_SYSTEM,
-                ),
-                CustomAgentConfig(
-                    name="gemini-expert",
-                    display_name="Gemini Expert",
-                    description="Ask Gemini for a second opinion when stuck.",
-                    prompt=EXPERT_SYSTEM,
-                ),
-            ],
-        }
-        mcp_servers = agent_bundle.mcps.get("servers", {})
-        if mcp_servers:
-            resume_config["mcp_servers"] = mcp_servers
+        _custom_agents = [
+            CustomAgentConfig(
+                name="gpt-expert",
+                display_name="GPT Expert",
+                description="Ask GPT for a second opinion when stuck.",
+                prompt=EXPERT_SYSTEM,
+            ),
+            CustomAgentConfig(
+                name="gemini-expert",
+                display_name="Gemini Expert",
+                description="Ask Gemini for a second opinion when stuck.",
+                prompt=EXPERT_SYSTEM,
+            ),
+        ]
+        mcp_servers = agent_bundle.mcps.get("servers", {}) or None
+
         session = await client.resume_session(
             copilot_session_id,
-            resume_config,
+            on_permission_request=PermissionHandler.approve_all,
+            model=_model,
+            tools=agent_bundle.tools,
+            streaming=follow or None,
+            working_directory=str(ctx.session_dir),
+            custom_agents=_custom_agents,
+            mcp_servers=mcp_servers,
         )
 
         done = asyncio.Event()
@@ -744,7 +744,7 @@ async def resume_session(
                 f"(follow these IMMEDIATELY):\n{hints}"
             )
 
-        await session.send({"prompt": "\n".join(resume_parts)})
+        await session.send("\n".join(resume_parts))
 
         _consecutive_nudges = 0
         while True:
@@ -779,7 +779,7 @@ async def resume_session(
                         file=sys.stderr, flush=True,
                     )
                 _activity["last"] = time.monotonic()
-                await session.send({"prompt": nudge})
+                await session.send(nudge)
                 continue
             _consecutive_nudges = 0
             done.clear()
@@ -805,7 +805,7 @@ async def resume_session(
                     print(
                         f"\nReflection checkpoint ({tc} tools)", file=sys.stderr, flush=True
                     )
-                await session.send({"prompt": reflection})
+                await session.send(reflection)
             else:
                 # Check if save_memory was called
                 if not _reflection_state["saved_memory"]:
@@ -817,7 +817,7 @@ async def resume_session(
                     action_log.log_prompt(reminder)
                     if follow:
                         print("\nEnforcing save_memory...", file=sys.stderr, flush=True)
-                    await session.send({"prompt": reminder})
+                    await session.send(reminder)
                 else:
                     action_log._status = "completed"
                     break
@@ -1086,6 +1086,7 @@ async def ralph_loop(
     challenge_num: int = 0,
     follow: bool = True,
     max_steps: int = 0,
+    model: str = "",
 ) -> None:
     """Run the Ralph loop."""
     print("=" * 60)
@@ -1145,6 +1146,7 @@ async def ralph_loop(
                 task=iter_task,
                 challenge_num=challenge_num,
                 max_steps=max_steps,
+                model=model,
             )
             action_log.print_summary()
 
@@ -1199,9 +1201,11 @@ def cli() -> None:
 @click.option("--challenge-num", default=0, type=int, help="Challenge/season number.")
 @click.option("-f", "--follow/--no-follow", default=True, help="Stream agent output.")
 @click.option("--max-steps", default=0, type=int, help="Stop after N tool calls.")
+@click.option("--model", default="", help="Override the LLM model.")
 def ralph(
     iterations: int, seed_from: str, url: str, bundle: str,
     task: str, challenge_num: int, follow: bool, max_steps: int,
+    model: str,
 ) -> None:
     """Run the iterating solve loop."""
     asyncio.run(ralph_loop(
@@ -1213,6 +1217,7 @@ def ralph(
         challenge_num=challenge_num,
         follow=follow,
         max_steps=max_steps,
+        model=model,
     ))
 
 
@@ -1222,14 +1227,15 @@ def ralph(
 @click.option("-f", "--follow/--no-follow", default=True, help="Stream agent output.")
 @click.option("--max-steps", default=0, type=int, help="Stop after N tool calls.")
 @click.option("--task", default="", help="Custom task instruction.")
+@click.option("--model", default="", help="Override the LLM model.")
 def resume(
     session_id: str, bundle: str, follow: bool,
-    max_steps: int, task: str,
+    max_steps: int, task: str, model: str,
 ) -> None:
     """Resume an interrupted session."""
     action_log = asyncio.run(resume_session(
         session_id, follow=follow, bundle=bundle,
-        max_steps=max_steps, task=task,
+        max_steps=max_steps, task=task, model=model,
     ))
     action_log.print_summary()
 

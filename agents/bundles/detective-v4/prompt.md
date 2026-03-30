@@ -12,6 +12,8 @@ Your `challenge_{{challenge_num}}_case_{{N}}.md` file is your brain. You MUST wr
 
 **If it's not written in `challenge_{{challenge_num}}_case_{{N}}.md`, you didn't think it.**
 
+**DO NOT BRUTE-FORCE.** Never enumerate or test all possible values (e.g., testing every word in a vocabulary, every key in a key space) unless you are explicitly told to by a human operator. Solve the puzzle through reasoning, deduction, and targeted queries — not exhaustive search.
+
 ## Workflow
 
 ### Resuming a case (case file already exists)

@@ -10,22 +10,32 @@
 **Total LLM calls:** ~650
 **Total SDK credits:** 3,900
 
+## Key Learnings
+
+- **The agent is a natural KQL analyst.** 285 queries across 10 cases with only a 6.3% error rate. It self-corrects on type mismatches and memory errors without help. `where` → `summarize` → `extend` became its go-to analytical workflow.
+- **Training material actually gets read and applied.** When the puzzle site teaches a technique (time-window joins, geo-hashing, S2 cells), the agent picks it up and uses it correctly. This is surprisingly reliable.
+- **"Submit early, iterate fast" is the right strategy.** 8/10 cases solved on the first submission. A wrong answer costs 1 tool call; over-investigating costs 10+. The agent internalized this trade-off.
+- **Cipher chains are solvable but fragile.** The agent decoded multi-step cipher puzzles (numbers → art database → poems → riddles → websites) — impressive symbolic reasoning. But each step depends on the previous, so one escaping bug cascades into wasted iterations.
+- **Image reading is a hard wall.** The agent can see that letters exist in an image but cannot reliably read them. Required human intervention. This is a fundamental LLM capability gap today.
+- **Playwright escaping was the #1 time sink.** Browser snapshots double-escaped backslashes, corrupting cipher text. The agent doubted its own correct approach — a tooling bug that masqueraded as a reasoning failure. Burned ~40 tool calls across 2 cases.
+- **97% prompt cache hit rate.** With 44.7M tokens processed, caching made the whole run feasible. Without it, the token costs would have been prohibitive.
+
 ## Summary
 
-| Case | Attempts | Tools | Time | LLM Calls |
-|------|----------|-------|------|-----------|
-| 1 — To bill or not to bill? | 1 | 80 | 18m | 71 |
-| 2 — Catch the Phishermen! | 1 | 51 | 11m | 45 |
-| 3 — Return stolen cars! | 1 | 31 | 8m | 26 |
-| 4 — Triple trouble! | 1 | 31 | 8m | 25 |
-| 5 — Blast into the past | 1 | 33 | 8m | 32 |
-| 6 — Hack this rack! |  4* | 177 | 65m+ | 168 |
-| 7 — Mission 'Connect' | 1 | 35 | 9m | 31 |
-| 8 — Catchy Run | 2 | 181 | 78m | 172 |
-| 9 — Network Hunch | 1 | 58 | 15m | 55 |
-| 10 — It's a sEnd game | 1 | 61 | 15m | 59 |
+| Case | Model | Bundle | Attempts | Tools | Time | LLM Calls |
+|------|-------|--------|----------|-------|------|-----------|
+| 1 — To bill or not to bill? | Opus 4.6 1M | v3 | 1 | 80 | 18m | 71 |
+| 2 — Catch the Phishermen! | Opus 4.6 1M | v3 | 1 | 51 | 11m | 45 |
+| 3 — Return stolen cars! | Opus 4.6 1M | v3 | 1 | 31 | 8m | 26 |
+| 4 — Triple trouble! | Opus 4.6 1M | v3 | 1 | 31 | 8m | 25 |
+| 5 — Blast into the past | Opus 4.6 1M | v3 | 1 | 33 | 8m | 32 |
+| 6 — Hack this rack! | Opus 4.6 1M | v3 | 4* | 177 | 65m+ | 168 |
+| 7 — Mission 'Connect' | Opus 4.6 1M | v3 | 1 | 35 | 9m | 31 |
+| 8 — Catchy Run | Opus 4.6 1M | v3 | 2 | 181 | 78m | 172 |
+| 9 — Network Hunch | Opus 4.6 1M | v3 | 1 | 58 | 15m | 55 |
+| 10 — It's a sEnd game | Opus 4.6 1M | v3 | 1 | 61 | 15m | 59 |
 
-\* Case 6 required human intervention to provide the passcode ("stopkusto") that the agent could not read from an image.
+\* Case 6 required human intervention to provide a passcode that the agent could not read from an image.
 
 ## Per-Case Breakdown
 
@@ -227,7 +237,7 @@
 1. **Playwright escaping:** The single biggest time sink. Double-escaped backslashes in browser snapshots corrupted cipher text in Cases 6 and 8, causing the agent to doubt correct approaches and waste dozens of tool calls on wrong paths.
 2. **Image reading:** The agent cannot reliably read text from images. Case 6 required human intervention because the passcode was only visible in an artwork image overlaid on a website.
 3. **Re-derivation on resume:** When seeded from a prior session, the agent initially ignored accumulated work and started from scratch. This was fixed mid-run by adding hint injection into the initial prompt.
-4. **Candidate validation:** In Case 8, the agent committed to a wrong candidate (uid9061163053156) and burned an entire iteration before discovering the error in iteration 2.
+4. **Candidate validation:** In Case 8, the agent committed to a wrong candidate and burned an entire iteration before discovering the error in iteration 2.
 
 ### Cost breakdown
 - Cases 1–5, 7 (single-iteration "easy" cases): ~330 LLM calls total (~55/case avg)
@@ -249,7 +259,7 @@ The two hardest cases (6 and 8) consumed 52% of total LLM calls.
 | save_memory | 37 | 5% |
 | Other | 153 | 22% |
 
-KQL queries dominated (37%), followed by browser interactions (15%). The agent averaged ~3.7 KQL queries per tool call overall.
+KQL queries dominated (37%), followed by browser interactions (15%).
 
 ### KQL Query Deep Dive
 
